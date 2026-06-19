@@ -12,20 +12,37 @@
   tableau.extensions.initializeAsync().then(() => {
     const worksheet = tableau.extensions.worksheetContent.worksheet;
     let lastTree = null;
+    let lastStages = [];
+
+    // Click a node -> select the marks on its path so native Tableau filter
+    // actions (run "On Select") fire. Path index i aligns with stage field i.
+    function onNodeClick(path) {
+      const criteria = [];
+      path.forEach((value, i) => {
+        if (value !== '(none)' && lastStages[i]) criteria.push({ fieldName: lastStages[i], value: [value] });
+      });
+      const update = criteria.length
+        ? worksheet.selectMarksByValueAsync(criteria, tableau.SelectionUpdateType.Replace)
+        : worksheet.clearSelectedMarksAsync();
+      Promise.resolve(update).catch((e) => console.warn('select failed:', e));
+    }
+
+    function draw() { DecisionMap.renderTree(lastTree, el('tree'), { onNodeClick }); }
 
     async function updateAndRender() {
       const [rows, stageFields] = await Promise.all([
         getRows(worksheet),
         getStageFields(worksheet),
       ]);
+      lastStages = stageFields;
       if (stageFields.length === 0) { showHint(true); return; }
       showHint(false);
       lastTree = DecisionMap.build(rows, stageFields);
-      DecisionMap.renderTree(lastTree, el('tree'));
+      draw();
     }
 
     // Re-render (no refetch) on resize; refetch when the data changes.
-    window.addEventListener('resize', () => { if (lastTree) DecisionMap.renderTree(lastTree, el('tree')); });
+    window.addEventListener('resize', () => { if (lastTree) draw(); });
     worksheet.addEventListener(tableau.TableauEventType.SummaryDataChanged, updateAndRender);
     updateAndRender();
   }).catch((e) => { el('hint').textContent = 'Init failed: ' + e; showHint(true); });

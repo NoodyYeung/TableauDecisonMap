@@ -8,7 +8,10 @@
 (function (global) {
   'use strict';
 
-  function renderTree(treeRoot, svgEl) {
+  // opts.onNodeClick(pathNames) — called with the stage values from root to the
+  // clicked node (index i aligns with stage i, '(none)' for skipped stages).
+  function renderTree(treeRoot, svgEl, opts) {
+    opts = opts || {};
     const svg = d3.select(svgEl);
     svg.selectAll('*').remove();
     if (!treeRoot || !treeRoot.children || treeRoot.children.length === 0) return false;
@@ -58,6 +61,16 @@
       .join('g')
       .attr('class', (d) => 'node' + (d.children ? '' : ' leaf'))
       .attr('transform', (d) => `translate(${d.y},${d.x})`);
+
+    // Optional click-to-select: pass the path (root -> node) of stage values.
+    if (typeof opts.onNodeClick === 'function') {
+      node.style('cursor', 'pointer').on('click', (event, d) => {
+        const path = d.ancestors().reverse()
+          .filter((a) => !isSynthetic(a))
+          .map((a) => a.data.name);
+        opts.onNodeClick(path, event);
+      });
+    }
 
     node.append('circle').attr('r', 6)
       .append('title').text((d) => `${d.data.name} · ${d.data.count} horse(s)`);

@@ -69,7 +69,18 @@
       if (stages.length === 0) { showEmpty(true); setStatus('No *_state columns — use Configure'); return; }
       const rows = toRows(columns, dataRows);
       const tree = DecisionMap.build(rows, stages);
-      showEmpty(!DecisionMap.renderTree(tree, el('tree')));
+      // Click a node -> select its path's marks so dashboard filter actions ("On Select") fire.
+      const onNodeClick = (path) => {
+        const criteria = [];
+        path.forEach((value, i) => {
+          if (value !== '(none)' && stages[i]) criteria.push({ fieldName: stages[i], value: [value] });
+        });
+        const update = criteria.length
+          ? ws.selectMarksByValueAsync(criteria, tableau.SelectionUpdateType.Replace)
+          : ws.clearSelectedMarksAsync();
+        Promise.resolve(update).catch((e) => setStatus('Select: ' + e));
+      };
+      showEmpty(!DecisionMap.renderTree(tree, el('tree'), { onNodeClick }));
       setStatus(`${rows.length} rows · ${stages.join(' → ')}`);
     }).catch((e) => { showEmpty(true); setStatus('Error: ' + e); });
   }

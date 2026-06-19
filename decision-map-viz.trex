@@ -16,7 +16,7 @@
         <role-type>discrete-dimension</role-type>
         <role-type>discrete-measure</role-type>
       </role-spec>
-      <fields max-count="10"/>
+      <fields max-count="25"/>
       <tooltip>Drop your stage fields here in order: i_state, 1_state, 2_state, ... The first field is the root; add as many as you have.</tooltip>
     </encoding>
   </worksheet-extension>

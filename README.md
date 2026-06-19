@@ -104,8 +104,26 @@ The error *"This extension is not a viz extension"* means you tried to add the
 4. The extension shows one **Stages (in order)** shelf. Drop your stage fields
    onto it **in order** — `i_state`, `1_state`, `2_state`, `3_state`, … The first
    field is the root; add as many as you have (the stage count is **not**
-   hardcoded — up to 10 fields on the shelf). The tree renders in the worksheet
-   and updates as the data/filters change.
+   hardcoded — the shelf accepts up to `max-count` fields, currently **25**;
+   bump it in `decision-map-viz.trex` if you need more). The tree renders in the
+   worksheet and updates as the data/filters change.
+
+## Click a node to filter (Tableau action filters)
+
+Clicking a node **selects the marks on its path** (e.g. clicking `c` under
+`retired → b` selects rows where `i_state = retired` AND `1_state = b` AND
+`2_state = c`) via `selectMarksByValueAsync`. To turn that selection into a
+filter on the rest of your dashboard, add a **native Tableau Filter Action**:
+
+1. Put the extension's worksheet on a **dashboard** with the sheets you want to
+   filter.
+2. **Dashboard → Actions → Add Action → Filter…**
+3. **Source:** the worksheet running the decision map. **Run on:** *Select*.
+   **Target:** the sheets to filter. **Clearing the selection:** your choice.
+4. Now clicking a node filters the targets to that path; clicking empty space
+   clears it. (Skipped `(none)` stages are left out of the selection criteria.)
+
+The dashboard-extension version does the same against its source worksheet.
 
 ## How the counts / thickness work
 
@@ -160,7 +178,8 @@ Keep `localhost` in the repo's `.trex`; change the URL only in the deployed copy
 
 ## Next steps / ideas
 
-- Click a node to filter the dashboard: `worksheet.applyFilterAsync(field, [value], FilterUpdateType.Replace)`.
+- Click-a-node selection is implemented (see *Click a node to filter* above). To
+  filter directly instead of via an action, swap to `worksheet.applyFilterAsync`.
 - Color nodes by stage depth, or size them by count.
 - Reads via `getSummaryDataReaderAsync` (Tableau 2022.4+ / API ≥ 1.10); for older
   Tableau swap to `getSummaryDataAsync`.
