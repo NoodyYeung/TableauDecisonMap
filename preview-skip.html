@@ -18,7 +18,7 @@
 <body>
   <section>
     <h3>Skipped stages just collapse — no placeholder node</h3>
-    <p class="cap">Horse C skips stage&nbsp;1 → drawn <b>retired → c</b>. Horse F skips stages 1&nbsp;&amp;&nbsp;2 → drawn <b>retired → g</b>. No “(none)” node appears anywhere.</p>
+    <p class="cap">Horse C skips stage&nbsp;1 → drawn <b>retired → c</b>. Horse F (<b>retired → none → none → g</b>) and horse G (<b>retired → none → none → d</b>) skip stages 1&nbsp;&amp;&nbsp;2 → drawn <b>retired → g</b> and <b>retired → d</b>. No “(none)” node appears anywhere.</p>
     <svg id="tree"></svg>
   </section>
 
@@ -30,7 +30,8 @@
       { i_state: 'retired', '1_state': '',  '2_state': 'c', '3_state': 'd' },   // C: SKIPS stage 1
       { i_state: 'retired', '1_state': 'a' },                                   // D: stops early
       { i_state: 'retired', '1_state': 'a' },                                   // E: stops early
-      { i_state: 'retired', '1_state': '',  '2_state': '',  '3_state': 'g' },   // F: SKIPS stages 1 & 2
+      { i_state: 'retired', '1_state': '',  '2_state': '',  '3_state': 'g' },   // F: SKIPS stages 1 & 2 -> g
+      { i_state: 'retired', '1_state': '',  '2_state': '',  '3_state': 'd' },   // G: retired > none > none > d
     ];
     DecisionMap.renderTree(DecisionMap.build(ROWS, STAGES), document.getElementById('tree'));
   </script>
