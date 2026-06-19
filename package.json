@@ -1,13 +1,10 @@
 {
   "name": "decision-map-extension",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "Tableau Dashboard Extension that renders a decision tree from parent/child columns and hides null branches by default.",
+  "description": "Tableau Dashboard Extension that renders a decision tree from staged state columns; empty/skipped stages are hidden while keeping the stage columns aligned.",
   "scripts": {
-    "start": "http-server -p 8080 -c-1 .",
-    "serve": "npx --yes http-server -p 8080 -c-1 ."
-  },
-  "devDependencies": {
-    "http-server": "^14.1.1"
+    "start": "python3 serve.py",
+    "serve": "python3 serve.py"
   }
 }
