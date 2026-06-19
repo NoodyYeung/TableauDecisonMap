@@ -10,13 +10,18 @@
   const isBlank = (v) => v === undefined || v === null ||
     (typeof v === 'string' && (v.trim() === '' || v.trim().toLowerCase() === 'null'));
 
-  // One row -> the ordered list of stage values it visits.
-  // Blank stages are always dropped, so gaps collapse (skip-staging) and no
-  // placeholder node is ever produced.
+  // One row -> ordered stage values, ONE ENTRY PER STAGE so tree depth == stage
+  // level (columns stay aligned). A skipped (blank) stage becomes a '(none)'
+  // placeholder — kept for layout but rendered invisibly. Trailing blanks (the
+  // row simply ended) are dropped so early-stoppers don't grow phantom nodes.
   function rowToPath(row, stageFields) {
-    return stageFields
-      .map((f) => (isBlank(row[f]) ? null : String(row[f]).trim()))
-      .filter((v) => v !== null);
+    const raw = stageFields.map((f) => (isBlank(row[f]) ? null : String(row[f]).trim()));
+    let last = -1;
+    raw.forEach((v, i) => { if (v !== null) last = i; });
+    if (last < 0) return [];
+    const path = [];
+    for (let i = 0; i <= last; i++) path.push(raw[i] !== null ? raw[i] : '(none)');
+    return path;
   }
 
   function rowsToPaths(rows, stageFields) {

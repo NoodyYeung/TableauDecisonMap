@@ -40,9 +40,9 @@
       .attr('stroke-width', (d) => weight(d.target.data.count))
       .attr('d', d3.linkHorizontal().x((d) => d.y).y((d) => d.x));
 
-    // Edge labels = the count of horses on that edge.
+    // Edge labels = the count of horses on that edge (skip edges into invisible (none)).
     g.append('g').selectAll('text.link-label')
-      .data(root.links())
+      .data(root.links().filter((d) => d.target.data.name !== '(none)'))
       .join('text')
       .attr('class', 'link-label')
       .attr('x', (d) => (d.source.y + d.target.y) / 2)
@@ -51,9 +51,10 @@
       .attr('text-anchor', 'middle')
       .text((d) => d.target.data.count);
 
-    // Nodes (skip the synthetic multi-root connector if present).
+    // Nodes — skip the synthetic root connector AND the invisible (none)
+    // placeholders (kept in the layout for stage alignment, never drawn).
     const node = g.append('g').selectAll('g')
-      .data(root.descendants().filter((d) => !isSynthetic(d)))
+      .data(root.descendants().filter((d) => !isSynthetic(d) && d.data.name !== '(none)'))
       .join('g')
       .attr('class', (d) => 'node' + (d.children ? '' : ' leaf'))
       .attr('transform', (d) => `translate(${d.y},${d.x})`);
