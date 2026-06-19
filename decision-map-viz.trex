@@ -3,36 +3,21 @@
   <worksheet-extension id="com.noody.decisionmap.viz" extension-version="1.0.0">
     <default-locale>en_US</default-locale>
     <name resource-id="name"/>
-    <description>Decision Map (Viz Extension). Drop one stage field on each shelf (Initial, then Stage 1..3); the worksheet renders a counted decision tree, hiding empty/skipped stages while keeping stage columns aligned.</description>
+    <description>Decision Map (Viz Extension). Drop your stage fields on the Stages shelf in order (i_state, 1_state, 2_state, ...); the first field is the root. The worksheet renders a counted decision tree, hiding empty/skipped stages while keeping stage columns aligned.</description>
     <author name="noody" email="yeungchunyin1996@gmail.com" organization="noody" website="https://example.com"/>
     <min-api-version>1.11</min-api-version>
     <source-location>
       <url>http://localhost:8080/viz.html</url>
     </source-location>
     <icon/>
-    <encoding id="istate">
-      <display-name>Initial (i_state)</display-name>
-      <fields max-count="1"/>
-      <encoding-icon token="text" />
-      <tooltip>The starting state every row shares, e.g. i_state.</tooltip>
-    </encoding>
-    <encoding id="stage1">
-      <display-name>Stage 1</display-name>
-      <fields max-count="1"/>
-      <encoding-icon token="text" />
-      <tooltip>First stage column, e.g. 1_state.</tooltip>
-    </encoding>
-    <encoding id="stage2">
-      <display-name>Stage 2</display-name>
-      <fields max-count="1"/>
-      <encoding-icon token="text" />
-      <tooltip>Second stage column, e.g. 2_state.</tooltip>
-    </encoding>
-    <encoding id="stage3">
-      <display-name>Stage 3</display-name>
-      <fields max-count="1"/>
-      <encoding-icon token="text" />
-      <tooltip>Third stage column, e.g. 3_state.</tooltip>
+    <encoding id="stages">
+      <display-name>Stages (in order)</display-name>
+      <role-spec>
+        <role-type>discrete-dimension</role-type>
+        <role-type>discrete-measure</role-type>
+      </role-spec>
+      <fields max-count="10"/>
+      <tooltip>Drop your stage fields here in order: i_state, 1_state, 2_state, ... The first field is the root; add as many as you have.</tooltip>
     </encoding>
   </worksheet-extension>
   <resources>

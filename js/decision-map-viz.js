@@ -5,8 +5,8 @@
 (function () {
   'use strict';
 
-  // Encoding ids from decision-map-viz.trex, IN STAGE ORDER (max 4 per Tableau).
-  const STAGE_ENCODINGS = ['istate', 'stage1', 'stage2', 'stage3'];
+  // The single multi-field encoding id from decision-map-viz.trex.
+  const STAGES_ENCODING = 'stages';
   const el = (id) => document.getElementById(id);
 
   tableau.extensions.initializeAsync().then(() => {
@@ -30,17 +30,16 @@
     updateAndRender();
   }).catch((e) => { el('hint').textContent = 'Init failed: ' + e; showHint(true); });
 
-  // encoding id -> field the user placed on that shelf -> ordered stage field names.
+  // Every field the user dropped on the "Stages" shelf, IN ORDER (dynamic count).
+  // marksCard.encodings lists one entry per field; the same id repeats in drop order.
   async function getStageFields(worksheet) {
     const spec = await worksheet.getVisualSpecificationAsync();
-    const map = {};
+    const fields = [];
     if (spec.activeMarksSpecificationIndex >= 0) {
       const marks = spec.marksSpecifications[spec.activeMarksSpecificationIndex];
-      marks.encodings.forEach((enc) => { map[enc.id] = enc.field; });
+      marks.encodings.forEach((enc) => { if (enc.id === STAGES_ENCODING) fields.push(enc.field.name); });
     }
-    return STAGE_ENCODINGS
-      .filter((id) => map[id])
-      .map((id) => map[id].name);
+    return fields;
   }
 
   // Summary data -> [{ fieldName: formattedValue|null }, ...] keyed by column name.

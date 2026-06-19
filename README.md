@@ -101,11 +101,11 @@ The error *"This extension is not a viz extension"* means you tried to add the
 3. **Add the viz extension:** on the **Marks** card, open the mark-type dropdown
    and choose **Add Extension** (this opens the Viz Extensions browser) →
    **Access Local Extensions** → pick **`decision-map-viz.trex`** → allow it.
-4. The extension shows encoding shelves: **Initial (i_state)**, **Stage 1 … 3**
-   (Tableau caps viz extensions at 4 encodings). Drop one field on each
-   (`i_state` on Initial, `1_state` on Stage 1, `2_state` on Stage 2, `3_state`
-   on Stage 3). The decision tree renders in the worksheet and updates as the
-   data/filters change. Leave a Stage shelf empty if you have fewer stages.
+4. The extension shows one **Stages (in order)** shelf. Drop your stage fields
+   onto it **in order** — `i_state`, `1_state`, `2_state`, `3_state`, … The first
+   field is the root; add as many as you have (the stage count is **not**
+   hardcoded — up to 10 fields on the shelf). The tree renders in the worksheet
+   and updates as the data/filters change.
 
 ## How the counts / thickness work
 
