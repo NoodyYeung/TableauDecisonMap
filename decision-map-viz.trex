@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest manifest-version="0.1" xmlns="http://www.tableau.com/xml/extension_manifest">
+  <worksheet-extension id="com.noody.decisionmap.viz" extension-version="1.0.0">
+    <default-locale>en_US</default-locale>
+    <name resource-id="name"/>
+    <description>Decision Map (Viz Extension). Drop one stage field on each shelf (Initial, then Stage 1..4); the worksheet renders a counted decision tree, hiding empty/skipped stages while keeping stage columns aligned.</description>
+    <author name="noody" email="yeungchunyin1996@gmail.com" organization="noody" website="https://example.com"/>
+    <min-api-version>1.11</min-api-version>
+    <source-location>
+      <url>http://localhost:8080/viz.html</url>
+    </source-location>
+    <icon/>
+    <encoding id="istate">
+      <display-name>Initial (i_state)</display-name>
+      <fields max-count="1"/>
+      <encoding-icon token="text" />
+      <tooltip>The starting state every row shares, e.g. i_state.</tooltip>
+    </encoding>
+    <encoding id="stage1">
+      <display-name>Stage 1</display-name>
+      <fields max-count="1"/>
+      <encoding-icon token="text" />
+      <tooltip>First stage column, e.g. 1_state.</tooltip>
+    </encoding>
+    <encoding id="stage2">
+      <display-name>Stage 2</display-name>
+      <fields max-count="1"/>
+      <encoding-icon token="text" />
+      <tooltip>Second stage column, e.g. 2_state.</tooltip>
+    </encoding>
+    <encoding id="stage3">
+      <display-name>Stage 3</display-name>
+      <fields max-count="1"/>
+      <encoding-icon token="text" />
+      <tooltip>Third stage column, e.g. 3_state.</tooltip>
+    </encoding>
+    <encoding id="stage4">
+      <display-name>Stage 4</display-name>
+      <fields max-count="1"/>
+      <encoding-icon token="text" />
+      <tooltip>Fourth stage column (optional).</tooltip>
+    </encoding>
+  </worksheet-extension>
+  <resources>
+    <resource id="name">
+      <text locale="en_US">Decision Map (Viz)</text>
+    </resource>
+  </resources>
+</manifest>

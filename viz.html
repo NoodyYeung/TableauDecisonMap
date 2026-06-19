@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Decision Map (Viz)</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="lib/tableau.extensions.1.latest.js"></script>
+  <script src="lib/d3.min.js"></script>
+  <style>
+    /* Viz extensions own the whole worksheet area — no toolbar chrome. */
+    html, body { height: 100%; }
+    #content { position: absolute; inset: 0; overflow: auto; }
+    #tree { display: block; }
+    #hint {
+      position: absolute; inset: 0; display: flex; align-items: center;
+      justify-content: center; text-align: center; color: #6b6b6b;
+      font-family: "Segoe UI", system-ui, sans-serif; font-size: 13px; padding: 24px;
+    }
+    #hint code { background: #eef1f4; padding: 1px 4px; border-radius: 3px; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div id="content"><svg id="tree"></svg></div>
+  <div id="hint" class="hidden">
+    Drop a field on the <b>Initial</b> shelf and one on each <b>Stage</b> shelf
+    (e.g. <code>i_state, 1_state, 2_state, 3_state</code>) to build the decision map.
+  </div>
+
+  <script src="js/build-tree.js"></script>
+  <script src="js/render-tree.js"></script>
+  <script src="js/decision-map-viz.js"></script>
+</body>
+</html>

@@ -37,9 +37,12 @@ Only columns matching `i_state` or `<n>_state` drive the map; everything else
 
 | File | Purpose |
 |------|---------|
-| `decision-map.trex` | The manifest you add to a Tableau dashboard (points at `http://localhost:8080/index.html`). |
+| `decision-map.trex` | **Dashboard** extension manifest — drop on a dashboard (points at `…/index.html`). |
+| `decision-map-viz.trex` | **Viz** extension manifest — add on a worksheet's Marks card (points at `…/viz.html`). |
 | `serve.py` | Python 3 dev server (no dependencies) — serves the folder with no-cache headers. |
-| `index.html` | Extension UI (toolbar + SVG canvas). |
+| `index.html` | Dashboard-extension UI (toolbar + SVG canvas). |
+| `viz.html` | Viz-extension UI (fills the worksheet; reads encoding shelves). |
+| `js/decision-map-viz.js` | Viz glue: encoding shelves → ordered stage fields → build + render. |
 | `preview.html` | **Standalone** preview with inline sample data — renders the tree with no Tableau. Open it in a browser to iterate the visual. |
 | `preview-skip.html` | Standalone demo of skipped/empty stages (stage levels kept, placeholders invisible). |
 | `js/build-tree.js` | Pure data shaping: wide rows → paths → counted prefix tree. |
@@ -50,7 +53,23 @@ Only columns matching `i_state` or `<n>_state` drive the map; everything else
 | `sample-data/stage-data.csv` | Demo data matching the table above. |
 | `sample-data/test-logic.js` | `node sample-data/test-logic.js` — tests the builder against the CSV. |
 
-## Run it (Tableau Desktop)
+## Two flavors
+
+This repo ships the **same decision map as both Tableau extension types** (they
+share `build-tree.js` + `render-tree.js`; only the data plumbing differs):
+
+| | Dashboard extension | Viz extension |
+|---|---|---|
+| Manifest | `decision-map.trex` (`<dashboard-extension>`) | `decision-map-viz.trex` (`<worksheet-extension>`) |
+| Added to | a **dashboard** (Extension object) | a **worksheet** (Marks card → Add Extension) |
+| Gets fields from | a named worksheet + Configure dialog | **encoding shelves** you drop fields on |
+| Min Tableau | 2022.4 (API 1.10) | 2024.2 (API 1.11) |
+
+The error *"This extension is not a viz extension"* means you tried to add the
+**dashboard** `.trex` in the worksheet Viz-Extensions browser — use
+`decision-map-viz.trex` there instead.
+
+## Run it as a Dashboard Extension (Tableau Desktop)
 
 1. **Serve the folder** with the bundled Python dev server (the manifest URL
    must resolve). It needs only Python 3 — no `npm install` — and sends no-cache
@@ -72,6 +91,20 @@ Only columns matching `i_state` or `<n>_state` drive the map; everything else
 
 4. The tree renders. Use the **gear menu → Configure** to choose the worksheet
    and stage-column order.
+
+## Run it as a Viz Extension (worksheet)
+
+1. **Serve the folder** the same way (`python3 serve.py`).
+2. **Open a worksheet** and put your data on it (the viz reads the worksheet's
+   own summary data, so the stage fields just need to be available — drop
+   `horse_no` on **Detail** to set the granularity).
+3. **Add the viz extension:** on the **Marks** card, open the mark-type dropdown
+   and choose **Add Extension** (this opens the Viz Extensions browser) →
+   **Access Local Extensions** → pick **`decision-map-viz.trex`** → allow it.
+4. The extension shows encoding shelves: **Initial (i_state)**, **Stage 1 … 4**.
+   Drop one field on each (`i_state` on Initial, `1_state` on Stage 1, …). The
+   decision tree renders in the worksheet and updates as the data/filters change.
+   Leave a Stage shelf empty if you have fewer stages.
 
 ## How the counts / thickness work
 
@@ -107,10 +140,10 @@ HTTPS or browser-transparent SSO.
    internal Nginx, or **GitHub Pages** (free; this repo could serve at
    `https://noodyyeung.github.io/TableauDecisonMap/index.html`). Upload the whole
    project as-is (`index.html`, `js/`, `css/`, `lib/`, `configure.html`).
-2. **Point the manifest at it:** edit `decision-map.trex` →
-   `<source-location><url>https://your-host/index.html</url></source-location>`.
-   The Configure dialog URL is derived from `window.location.origin`, so it
-   follows automatically.
+2. **Point the manifest at it:** edit the `<source-location><url>` in whichever
+   manifest you're shipping — `decision-map.trex` → `https://your-host/index.html`,
+   and/or `decision-map-viz.trex` → `https://your-host/viz.html`. (The Configure
+   dialog URL is derived from `window.location.origin`, so it follows automatically.)
 3. **Safe-list the URL (site admin)** under **Settings → Extensions**:
    - Turn on **"Let users run extensions on this site."**
    - Under **"Enable Specific Extensions,"** add the full URL
