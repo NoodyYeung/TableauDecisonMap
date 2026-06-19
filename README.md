@@ -42,7 +42,9 @@ Only columns matching `i_state` or `<n>_state` drive the map; everything else
 | `serve.py` | Python 3 dev server (no dependencies) — serves the folder with no-cache headers. |
 | `index.html` | Dashboard-extension UI (toolbar + SVG canvas). |
 | `viz.html` | Viz-extension UI (fills the worksheet; reads encoding shelves). |
-| `js/decision-map-viz.js` | Viz glue: encoding shelves → ordered stage fields → build + render. |
+| `js/decision-map-viz.js` | Viz glue: encoding shelves → ordered stage fields + size → build + render. |
+| `js/color-panel.js` | Per-(stage,value) color editor + default palette (viz). |
+| `preview-adv.html` | Standalone preview of the advanced options (color/size/% — no Tableau). |
 | `preview.html` | **Standalone** preview with inline sample data — renders the tree with no Tableau. Open it in a browser to iterate the visual. |
 | `preview-skip.html` | Standalone demo of skipped/empty stages (stage levels kept, placeholders invisible). |
 | `js/build-tree.js` | Pure data shaping: wide rows → paths → counted prefix tree. |
@@ -107,6 +109,22 @@ The error *"This extension is not a viz extension"* means you tried to add the
    hardcoded — the shelf accepts up to `max-count` fields, currently **25**;
    bump it in `decision-map-viz.trex` if you need more). The tree renders in the
    worksheet and updates as the data/filters change.
+5. Optionally drop a measure on the **Size (measure)** shelf — node *area* then
+   scales with the **SUM** of it over each node's rows (edge thickness still = count).
+
+## Advanced options (viz extension)
+
+- **Color by (stage · value):** each node is colored by its stage *and* value, so
+  `2_state = d` and `3_state = d` are independent. Click the **🎨 Colors** button
+  (top-right) to open a panel of swatches — one per `(stage, value)` — and recolor
+  any node. Choices are saved per worksheet (`tableau.extensions.settings`) and the
+  panel doubles as the legend. Unset nodes get an auto palette color.
+- **Node size:** the Size shelf above (`SUM`, area-proportional).
+- **% of parent on edges:** each branch shows `count (n%)`, where `n%` is its share
+  of the parent node (the branching probability).
+- **Richer tooltip:** hover a node for value, count, % of parent, and the Size sum.
+- **Click still = filter** (see below) — color editing lives only in the panel, so
+  there's no conflict.
 
 ## Click a node to filter (Tableau action filters)
 

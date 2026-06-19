@@ -52,11 +52,39 @@
     return root.children.length === 1 ? root.children[0] : root;
   }
 
-  function build(rows, stageFields) {
-    return pathsToTree(rowsToPaths(rows, stageFields));
+  const toNum = (v) => {
+    if (v === null || v === undefined || v === '') return 0;
+    const n = typeof v === 'number' ? v : parseFloat(String(v).replace(/[, ]/g, ''));
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  // Build the counted prefix tree. opts.sizeField (optional) is a numeric column
+  // summed into each node's `sizeSum` (for node-size encoding).
+  function build(rows, stageFields, opts) {
+    const sizeField = opts && opts.sizeField;
+    const root = { name: '', count: 0, sizeSum: 0, children: [], _index: new Map() };
+    for (const row of rows) {
+      const path = rowToPath(row, stageFields);
+      if (path.length === 0) continue;
+      const size = sizeField ? toNum(row[sizeField]) : 0;
+      let node = root;
+      node.count += 1; node.sizeSum += size;
+      for (const value of path) {
+        let child = node._index.get(value);
+        if (!child) {
+          child = { name: value, count: 0, sizeSum: 0, children: [], _index: new Map() };
+          node._index.set(value, child);
+          node.children.push(child);
+        }
+        child.count += 1; child.sizeSum += size;
+        node = child;
+      }
+    }
+    (function clean(n) { delete n._index; n.children.forEach(clean); })(root);
+    return root.children.length === 1 ? root.children[0] : root;
   }
 
-  const api = { rowToPath, rowsToPaths, pathsToTree, build, isBlank };
+  const api = { rowToPath, rowsToPaths, pathsToTree, build, isBlank, toNum };
   global.DecisionMap = global.DecisionMap || {};
   Object.assign(global.DecisionMap, api);
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Decision Map — advanced preview (color · size · %)</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="lib/d3.min.js"></script>
+  <script src="js/build-tree.js"></script>
+  <script src="js/render-tree.js"></script>
+  <script src="js/color-panel.js"></script>
+  <style>
+    body { margin: 0; }
+    #content { position: absolute; inset: 36px 0 0 0; overflow: auto; }
+    #bar { position: absolute; top: 0; left: 0; right: 0; height: 36px; display: flex;
+      align-items: center; gap: 10px; padding: 0 12px; border-bottom: 1px solid #e3e8ee;
+      background: #f7f9fb; font: 13px "Segoe UI", system-ui; color: #1f77b4; font-weight: 600; }
+    #colorPanel { position: absolute; top: 40px; right: 8px; width: 210px; max-height: 80%;
+      overflow: auto; background: #fff; border: 1px solid #b8c4d0; border-radius: 6px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.12); font: 12px "Segoe UI", system-ui; z-index: 3; }
+    .panel-head { display: flex; justify-content: space-between; padding: 6px 8px;
+      border-bottom: 1px solid #e3e8ee; font-weight: 600; color: #1f77b4; }
+    .panel-head button { border: none; background: none; cursor: pointer; font-size: 15px; }
+    .swatch-row { display: flex; align-items: center; gap: 8px; padding: 3px 8px; }
+    .swatch-row input[type=color] { width: 24px; height: 18px; padding: 0; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div id="bar">Advanced preview — color by (stage·value), size = SUM(stake), % of parent on edges</div>
+  <div id="content"><svg id="tree"></svg></div>
+  <div id="colorPanel">
+    <div class="panel-head"><span>Node colors</span><button id="colorClose">×</button></div>
+    <div id="swatches"></div>
+  </div>
+
+  <script>
+    const STAGES = ['i_state', '1_state', '2_state', '3_state'];
+    const ROWS = [
+      { i_state: 'retired', '1_state': 'b', '2_state': 'c', '3_state': 'd', stake: 300 },
+      { i_state: 'retired', '1_state': 'b', '2_state': 'c', '3_state': 'd', stake: 600 },
+      { i_state: 'retired', '1_state': 'b', '2_state': 'd', '3_state': 'f', stake: 250 },
+      { i_state: 'retired', '1_state': 'a', stake: 120 },
+      { i_state: 'retired', '1_state': 'a', stake: 80 },
+    ];
+    const store = {};                                  // stands in for tableau.extensions.settings
+    const key = (s, v) => `clr_${s}_${v}`;
+    const getColor = (s, v) => store[key(s, v)] || DecisionMap.autoColor(s, v);
+    const setColor = (s, v, hex) => { store[key(s, v)] = hex; };
+    const tree = DecisionMap.build(ROWS, STAGES, { sizeField: 'stake' });
+
+    function draw() {
+      DecisionMap.renderTree(tree, document.getElementById('tree'),
+        { color: getColor, sizeName: 'SUM(stake)', showPercent: true, onNodeClick: (p) => console.log('select', p) });
+    }
+    function pairs(t, d = 0, acc = [], seen = new Set()) {
+      if (t.name && t.name !== '(none)' && !seen.has(d + t.name)) { seen.add(d + t.name); acc.push({ stage: d, value: t.name }); }
+      t.children.forEach((c) => pairs(c, d + 1, acc, seen));
+      return acc;
+    }
+    DecisionMap.buildColorPanel(document.getElementById('swatches'), pairs(tree), getColor, setColor, draw);
+    document.getElementById('colorClose').addEventListener('click', () =>
+      document.getElementById('colorPanel').classList.add('hidden'));
+    draw();
+  </script>
+</body>
+</html>

@@ -19,6 +19,14 @@
       <fields max-count="25"/>
       <tooltip>Drop your stage fields here in order: i_state, 1_state, 2_state, ... The first field is the root; add as many as you have.</tooltip>
     </encoding>
+    <encoding id="size">
+      <display-name>Size (measure)</display-name>
+      <role-spec>
+        <role-type>continuous-measure</role-type>
+      </role-spec>
+      <fields max-count="1"/>
+      <tooltip>Optional. Drop a measure; each node's area scales with its SUM over the node's rows.</tooltip>
+    </encoding>
   </worksheet-extension>
   <resources>
     <resource id="name">
