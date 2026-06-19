@@ -1,0 +1,13 @@
+{
+  "name": "decision-map-extension",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tableau Dashboard Extension that renders a decision tree from parent/child columns and hides null branches by default.",
+  "scripts": {
+    "start": "http-server -p 8080 -c-1 .",
+    "serve": "npx --yes http-server -p 8080 -c-1 ."
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

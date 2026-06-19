@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Configure Decision Map</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="lib/tableau.extensions.1.latest.js"></script>
+  <style>
+    body { padding: 16px; }
+    .row { margin: 10px 0; display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+    .row select, .row input { padding: 4px; font-size: 13px; }
+    .actions { margin-top: 18px; display: flex; gap: 8px; justify-content: flex-end; }
+    button { padding: 5px 14px; border-radius: 4px; border: 1px solid var(--line); cursor: pointer; }
+    button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  </style>
+</head>
+<body>
+  <h3 style="margin:0 0 10px">Decision Map settings</h3>
+
+  <div class="row">
+    <label for="cfgWorksheet">Source worksheet</label>
+    <select id="cfgWorksheet"></select>
+  </div>
+  <div class="row">
+    <label for="cfgStages">Stage columns, in order (comma-separated)</label>
+    <input id="cfgStages" type="text" placeholder="i_state, 1_state, 2_state, 3_state" />
+    <small id="cfgAvail" style="color:#6b6b6b"></small>
+  </div>
+
+  <div class="actions">
+    <button id="cfgCancel">Cancel</button>
+    <button id="cfgSave" class="primary">Save</button>
+  </div>
+
+  <script src="js/configure.js"></script>
+</body>
+</html>

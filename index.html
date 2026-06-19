@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Decision Map</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- Tableau Extensions API + D3, both vendored locally (no CDN dependency) -->
+  <script src="lib/tableau.extensions.1.latest.js"></script>
+  <script src="lib/d3.min.js"></script>
+</head>
+<body>
+  <header id="toolbar">
+    <span class="title">Decision Map</span>
+
+    <label class="ctl">
+      Worksheet
+      <select id="worksheetSelect"></select>
+    </label>
+
+    <button id="refreshBtn" title="Reload data from the worksheet">Refresh</button>
+    <span id="status" class="status"></span>
+  </header>
+
+  <main id="canvas">
+    <svg id="tree"></svg>
+    <div id="empty" class="empty hidden">
+      <p>No data to display.</p>
+      <p class="hint">Pick a source worksheet above, or open the gear menu &rarr; Configure
+        to choose the ordered stage columns (e.g. <code>i_state, 1_state, 2_state, 3_state</code>).</p>
+    </div>
+  </main>
+
+  <script src="js/build-tree.js"></script>
+  <script src="js/render-tree.js"></script>
+  <script src="js/decision-map.js"></script>
+</body>
+</html>

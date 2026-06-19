@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Decision Map — preview (no Tableau)</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="lib/d3.min.js"></script>
+  <script src="js/build-tree.js"></script>
+  <script src="js/render-tree.js"></script>
+</head>
+<body>
+  <header id="toolbar">
+    <span class="title">Decision Map — preview</span>
+    <span class="status">standalone (sample data, no Tableau)</span>
+  </header>
+  <main id="canvas"><svg id="tree"></svg></main>
+
+  <script>
+    // The same 8 horses as sample-data/stage-data.csv, inline so the page is self-contained.
+    const STAGES = ['i_state', '1_state', '2_state', '3_state'];
+    const ROWS = [
+      { i_state: 'retired', '1_state': 'b', '2_state': 'c', '3_state': 'd' },
+      { i_state: 'retired', '1_state': 'a' },
+      { i_state: 'retired', '1_state': 'a' },
+      { i_state: 'retired', '1_state': 'b', '2_state': 'c', '3_state': 'd' },
+      { i_state: 'retired', '1_state': 'a' },
+      { i_state: 'retired', '1_state': 'b', '2_state': 'd', '3_state': 'f' },
+      { i_state: 'retired', '1_state': 'a' },
+      { i_state: 'retired', '1_state': 'a' },
+    ];
+    DecisionMap.renderTree(DecisionMap.build(ROWS, STAGES), document.getElementById('tree'));
+  </script>
+</body>
+</html>

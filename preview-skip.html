@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Decision Map — skip-staging demo</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="lib/d3.min.js"></script>
+  <script src="js/build-tree.js"></script>
+  <script src="js/render-tree.js"></script>
+  <style>
+    body { margin: 0; }
+    section { padding: 8px 16px 24px; }
+    h3 { margin: 12px 0 2px; font-size: 14px; color: #1f77b4; }
+    p.cap { margin: 0 0 6px; font-size: 12px; color: #6b6b6b; }
+    svg { display: block; }
+  </style>
+</head>
+<body>
+  <section>
+    <h3>Skipped stages just collapse — no placeholder node</h3>
+    <p class="cap">Horse C skips stage&nbsp;1 → drawn <b>retired → c</b>. Horse F skips stages 1&nbsp;&amp;&nbsp;2 → drawn <b>retired → g</b>. No “(none)” node appears anywhere.</p>
+    <svg id="tree"></svg>
+  </section>
+
+  <script>
+    const STAGES = ['i_state', '1_state', '2_state', '3_state'];
+    const ROWS = [
+      { i_state: 'retired', '1_state': 'b', '2_state': 'c', '3_state': 'd' },   // A: full path
+      { i_state: 'retired', '1_state': 'b', '2_state': 'c', '3_state': 'd' },   // B: full path
+      { i_state: 'retired', '1_state': '',  '2_state': 'c', '3_state': 'd' },   // C: SKIPS stage 1
+      { i_state: 'retired', '1_state': 'a' },                                   // D: stops early
+      { i_state: 'retired', '1_state': 'a' },                                   // E: stops early
+      { i_state: 'retired', '1_state': '',  '2_state': '',  '3_state': 'g' },   // F: SKIPS stages 1 & 2
+    ];
+    DecisionMap.renderTree(DecisionMap.build(ROWS, STAGES), document.getElementById('tree'));
+  </script>
+</body>
+</html>
