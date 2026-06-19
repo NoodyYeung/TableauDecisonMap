@@ -3,7 +3,7 @@
   <worksheet-extension id="com.noody.decisionmap.viz" extension-version="1.0.0">
     <default-locale>en_US</default-locale>
     <name resource-id="name"/>
-    <description>Decision Map (Viz Extension). Drop one stage field on each shelf (Initial, then Stage 1..4); the worksheet renders a counted decision tree, hiding empty/skipped stages while keeping stage columns aligned.</description>
+    <description>Decision Map (Viz Extension). Drop one stage field on each shelf (Initial, then Stage 1..3); the worksheet renders a counted decision tree, hiding empty/skipped stages while keeping stage columns aligned.</description>
     <author name="noody" email="yeungchunyin1996@gmail.com" organization="noody" website="https://example.com"/>
     <min-api-version>1.11</min-api-version>
     <source-location>
@@ -33,12 +33,6 @@
       <fields max-count="1"/>
       <encoding-icon token="text" />
       <tooltip>Third stage column, e.g. 3_state.</tooltip>
-    </encoding>
-    <encoding id="stage4">
-      <display-name>Stage 4</display-name>
-      <fields max-count="1"/>
-      <encoding-icon token="text" />
-      <tooltip>Fourth stage column (optional).</tooltip>
     </encoding>
   </worksheet-extension>
   <resources>

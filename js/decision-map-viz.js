@@ -5,8 +5,8 @@
 (function () {
   'use strict';
 
-  // Encoding ids from decision-map-viz.trex, IN STAGE ORDER.
-  const STAGE_ENCODINGS = ['istate', 'stage1', 'stage2', 'stage3', 'stage4'];
+  // Encoding ids from decision-map-viz.trex, IN STAGE ORDER (max 4 per Tableau).
+  const STAGE_ENCODINGS = ['istate', 'stage1', 'stage2', 'stage3'];
   const el = (id) => document.getElementById(id);
 
   tableau.extensions.initializeAsync().then(() => {
