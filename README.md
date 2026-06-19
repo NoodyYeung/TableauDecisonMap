@@ -114,12 +114,17 @@ The error *"This extension is not a viz extension"* means you tried to add the
 
 ## Advanced options (viz extension)
 
+- **Rectangle nodes:** each node is a sharp-cornered box with the value **centered
+  inside**; the fill is its color and the text auto-contrasts (black/white). Links
+  connect to the box edges.
 - **Color by (stage · value):** each node is colored by its stage *and* value, so
-  `2_state = d` and `3_state = d` are independent. Click the **🎨 Colors** button
-  (top-right) to open a panel of swatches — one per `(stage, value)` — and recolor
-  any node. Choices are saved per worksheet (`tableau.extensions.settings`) and the
-  panel doubles as the legend. Unset nodes get an auto palette color.
-- **Node size:** the Size shelf above (`SUM`, area-proportional).
+  `2_state = d` and `3_state = d` are independent. The **🎨 Legend** button
+  (top-right) **shows/hides** the legend panel — a swatch per `(stage, value)` that
+  doubles as the color editor. Pick any swatch to recolor that node; the legend
+  swatch and the node fill are the **same color** (one `getColor` source). Choices
+  save per worksheet (`tableau.extensions.settings`); unset nodes get an auto color.
+- **Node size:** area ∝ `SUM` of the Size shelf measure (the text box is the floor,
+  so labels always fit).
 - **% of parent on edges:** each branch shows `count (n%)`, where `n%` is its share
   of the parent node (the branching probability).
 - **Richer tooltip:** hover a node for value, count, % of parent, and the Size sum.

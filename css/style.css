@@ -64,21 +64,13 @@ html, body {
   stroke: var(--line);
   stroke-width: 1.5px;
 }
-.node circle {
-  fill: var(--node);
-  stroke: #fff;
-  stroke-width: 1.5px;
+/* Sharp-cornered rectangle nodes; fill + text color are set inline (per-node). */
+.node-rect {
+  stroke: rgba(0, 0, 0, 0.18);
+  stroke-width: 1px;
 }
-.node.leaf circle { fill: var(--node-leaf); }
-.node:hover circle { stroke: var(--accent); stroke-width: 2.5px; }
-.node.is-null circle { fill: var(--node-null); }
-.node text {
-  font-size: 12px;
-  fill: var(--ink);
-  paint-order: stroke;
-  stroke: #fff;
-  stroke-width: 3px;
-}
+.node:hover .node-rect { stroke: var(--accent); stroke-width: 2px; }
+.node text { font-size: 12px; }
 .link-label {
   font-size: 11px;
   fill: var(--muted);

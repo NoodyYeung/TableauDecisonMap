@@ -11,8 +11,11 @@
   const settings = () => tableau.extensions.settings;
 
   // ---- per-(stage,value) color persistence -------------------------------
+  // Single source of truth: BOTH the legend swatch and the node fill call getColor,
+  // and it always returns a normalized #rrggbb, so legend color == node color.
   const colorKey = (stage, value) => `clr_${stage}_${value}`;
-  const getColor = (stage, value) => settings().get(colorKey(stage, value)) || DecisionMap.autoColor(stage, value);
+  const normHex = (c) => (/^#[0-9a-fA-F]{6}$/.test(c || '') ? c : '#888888');
+  const getColor = (stage, value) => normHex(settings().get(colorKey(stage, value)) || DecisionMap.autoColor(stage, value));
   function setColor(stage, value, hex) { settings().set(colorKey(stage, value), hex); settings().saveAsync(); }
 
   tableau.extensions.initializeAsync().then(() => {

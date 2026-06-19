@@ -1,15 +1,14 @@
 /* render-tree.js — pure D3 rendering. Knows nothing about Tableau.
- * Input: a counted tree { name, count, children:[...] } (from build-tree.js).
- * Draws a left-to-right tree where:
- *   - node label  = stage value (name)
- *   - edge label  = horse count reaching that node
- *   - edge weight = thickness scaled by that count
+ * Input: a counted tree { name, count, sizeSum, children:[...] } (build-tree.js).
+ * Nodes are sharp-cornered RECTANGLES with the value centered inside.
+ *   - fill        = opts.color(stage, value) (per-(stage,value)); default blue/green
+ *   - box area    = grows with sqrt(sizeSum) (text box is the floor)
+ *   - edge label  = count, plus "(n%)" of parent when opts.showPercent
+ *   - edge weight = thickness scaled by count
  */
 (function (global) {
   'use strict';
 
-  // opts.onNodeClick(pathNames) — called with the stage values from root to the
-  // clicked node (index i aligns with stage i, '(none)' for skipped stages).
   function renderTree(treeRoot, svgEl, opts) {
     opts = opts || {};
     const svg = d3.select(svgEl);
@@ -19,90 +18,110 @@
     const root = d3.hierarchy(treeRoot);
     const isSynthetic = (d) => d.depth === 0 && !d.data.name;
 
-    // Layout sizing scales with the tree so it stays readable.
-    const dx = 30;                       // vertical gap between siblings
-    const dy = 200;                      // horizontal gap between levels
-    const width = (root.height + 1) * dy + 240;
-    const height = Math.max(root.leaves().length * dx + 40, 200);
-    svg.attr('viewBox', [0, 0, width, height]).attr('width', width).attr('height', height);
-
-    d3.tree().nodeSize([dx, dy])(root);
-    let minX = Infinity;
-    root.each((d) => { minX = Math.min(minX, d.x); });
-    const g = svg.append('g').attr('transform', `translate(90, ${-minX + 24})`);
-
-    // Thickness scale: edge weight grows with horse count (sqrt = better area perception).
-    const maxCount = d3.max(root.descendants(), (d) => d.data.count) || 1;
-    const weight = d3.scaleSqrt().domain([1, Math.max(2, maxCount)]).range([1.5, 14]);
-
-    // Node radius: by the Size measure (sqrt = area-proportional) when provided, else fixed.
+    // Size -> per-node scale (area grows with sqrt(size); the text box is the floor).
     const hasSize = !!opts.sizeName;
     const maxSize = d3.max(root.descendants(), (d) => d.data.sizeSum || 0) || 0;
-    const sizeScale = d3.scaleSqrt().domain([0, Math.max(1, maxSize)]).range([4, 22]);
-    const radiusOf = (d) => (hasSize && maxSize > 0 ? sizeScale(d.data.sizeSum || 0) : 6);
-    // Per-node color by (stage, value); returns null to fall back to CSS defaults.
-    const colorOf = (d) => (typeof opts.color === 'function' ? opts.color(d.depth, d.data.name) : null);
-    const pctOfParent = (d) => (d.parent && d.parent.data.count ? Math.round((d.data.count / d.parent.data.count) * 100) : null);
+    const scaleOf = (d) => (hasSize && maxSize > 0
+      ? 1 + Math.sqrt((d.data.sizeSum || 0) / maxSize) * 1.5 : 1); // [1, 2.5]
 
-    // Links
-    g.append('g').selectAll('path')
-      .data(root.links())
-      .join('path')
-      .attr('class', 'link')
-      .attr('stroke-width', (d) => weight(d.target.data.count))
-      .attr('d', d3.linkHorizontal().x((d) => d.y).y((d) => d.x));
+    const FONT = 12, LINE = FONT + 4, PADX = 9, PADY = 5;
+    const boxH = (d) => (LINE + PADY * 2) * scaleOf(d);
 
-    // Edge labels = the count of horses on that edge (skip edges into invisible (none)).
-    g.append('g').selectAll('text.link-label')
-      .data(root.links().filter((d) => d.target.data.name !== '(none)'))
-      .join('text')
-      .attr('class', 'link-label')
-      .attr('x', (d) => (d.source.y + d.target.y) / 2)
-      .attr('y', (d) => (d.source.x + d.target.x) / 2)
-      .attr('dy', '-0.35em')
-      .attr('text-anchor', 'middle')
-      .text((d) => {
-        const c = d.target.data.count;
-        const pct = opts.showPercent ? pctOfParent(d.target) : null;
-        return pct === null ? String(c) : `${c} (${pct}%)`;
-      });
+    // Layout: vertical gap derives from the tallest box so scaled boxes don't collide.
+    const maxBoxH = d3.max(root.descendants(), boxH) || 22;
+    const dy = 220;
+    d3.tree().nodeSize([Math.max(30, maxBoxH + 14), dy])(root);
+    let minX = Infinity, maxX = -Infinity;
+    root.each((d) => { minX = Math.min(minX, d.x); maxX = Math.max(maxX, d.x); });
+    const width = (root.height + 1) * dy + 320;
+    const height = Math.max((maxX - minX) + maxBoxH + 60, 200);
+    svg.attr('viewBox', [0, 0, width, height]).attr('width', width).attr('height', height);
+    const g = svg.append('g').attr('transform', `translate(130, ${-minX + maxBoxH / 2 + 24})`);
 
-    // Nodes — skip the synthetic root connector AND the invisible (none)
-    // placeholders (kept in the layout for stage alignment, never drawn).
-    const node = g.append('g').selectAll('g')
+    const maxCount = d3.max(root.descendants(), (d) => d.data.count) || 1;
+    const weight = d3.scaleSqrt().domain([1, Math.max(2, maxCount)]).range([1.5, 14]);
+    const colorOf = (d) => {
+      const c = (typeof opts.color === 'function') ? opts.color(d.depth, d.data.name) : null;
+      return c || (d.children ? '#4e79a7' : '#59a14f');
+    };
+    const contrast = (hex) => {
+      const m = /^#?([0-9a-fA-F]{6})$/.exec(hex || '');
+      if (!m) return '#111';
+      const n = parseInt(m[1], 16);
+      const lum = 0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255);
+      return lum > 150 ? '#111' : '#fff';
+    };
+    const pctOf = (d) => (d.parent && d.parent.data.count ? Math.round((d.data.count / d.parent.data.count) * 100) : null);
+    const tip = (d) => {
+      const p = pctOf(d);
+      let t = `${d.data.name} · ${d.data.count} horse(s)`;
+      if (p !== null) t += ` (${p}% of parent)`;
+      if (hasSize) t += `\n${opts.sizeName}: ${(d.data.sizeSum || 0).toLocaleString()}`;
+      return t;
+    };
+
+    const linkG = g.append('g');   // z-order: links < nodes < edge labels
+    const nodeG = g.append('g');
+    const labelG = g.append('g');
+
+    // Nodes: rectangles + centered value text (skip synthetic root & invisible (none)).
+    const node = nodeG.selectAll('g')
       .data(root.descendants().filter((d) => !isSynthetic(d) && d.data.name !== '(none)'))
       .join('g')
       .attr('class', (d) => 'node' + (d.children ? '' : ' leaf'))
       .attr('transform', (d) => `translate(${d.y},${d.x})`);
 
-    // Optional click-to-select: pass the path (root -> node) of stage values.
     if (typeof opts.onNodeClick === 'function') {
       node.style('cursor', 'pointer').on('click', (event, d) => {
-        const path = d.ancestors().reverse()
-          .filter((a) => !isSynthetic(a))
-          .map((a) => a.data.name);
+        const path = d.ancestors().reverse().filter((a) => !isSynthetic(a)).map((a) => a.data.name);
         opts.onNodeClick(path, event);
       });
     }
 
-    node.append('circle')
-      .attr('r', radiusOf)
-      .attr('fill', (d) => colorOf(d))            // null -> CSS default (leaf/internal)
-      .append('title').text((d) => {
-        const pct = pctOfParent(d);
-        let t = `${d.data.name} · ${d.data.count} horse(s)`;
-        if (pct !== null) t += ` (${pct}% of parent)`;
-        if (hasSize) t += `\n${opts.sizeName}: ${(d.data.sizeSum || 0).toLocaleString()}`;
-        return t;
+    node.append('title').text(tip);
+    const text = node.append('text')
+      .attr('text-anchor', 'middle').attr('dominant-baseline', 'central')
+      .style('font-size', FONT + 'px')
+      .text((d) => d.data.name);
+
+    // Measure each label, size its box, store half-width for edge routing.
+    node.each(function (d) {
+      const tw = this.querySelector('text').getComputedTextLength();
+      d._w = Math.max((tw + PADX * 2) * scaleOf(d), 18);
+      d._h = boxH(d);
+    });
+    node.insert('rect', 'text')
+      .attr('class', 'node-rect')
+      .attr('x', (d) => -d._w / 2).attr('y', (d) => -d._h / 2)
+      .attr('width', (d) => d._w).attr('height', (d) => d._h)
+      .attr('fill', (d) => colorOf(d));
+    text.attr('fill', (d) => contrast(colorOf(d)));
+
+    // Links: parent right edge -> child left edge (route through invisible nodes' centers).
+    const hw = (n) => (n._w ? n._w / 2 : 0);
+    linkG.selectAll('path').data(root.links()).join('path')
+      .attr('class', 'link')
+      .attr('stroke-width', (d) => weight(d.target.data.count))
+      .attr('d', (d) => {
+        const sx = d.source.y + hw(d.source), sy = d.source.x;
+        const tx = d.target.y - hw(d.target), ty = d.target.x;
+        const mx = (sx + tx) / 2;
+        return `M${sx},${sy}C${mx},${sy} ${mx},${ty} ${tx},${ty}`;
       });
 
-    const text = node.append('text').text((d) => d.data.name);
-    // Root label sits ABOVE its node so it always renders (never clipped at the left edge).
-    text.filter((d) => d.depth === 0).attr('text-anchor', 'middle').attr('x', 0).attr('y', (d) => -(radiusOf(d) + 7));
-    text.filter((d) => d.depth !== 0)
-      .attr('dy', '0.32em')
-      .attr('x', (d) => (d.children ? -(radiusOf(d) + 5) : radiusOf(d) + 5))
-      .attr('text-anchor', (d) => (d.children ? 'end' : 'start'));
+    // Edge labels: count (%) at the midpoint of node centers.
+    labelG.selectAll('text')
+      .data(root.links().filter((d) => d.target.data.name !== '(none)'))
+      .join('text')
+      .attr('class', 'link-label')
+      .attr('x', (d) => (d.source.y + d.target.y) / 2)
+      .attr('y', (d) => (d.source.x + d.target.x) / 2)
+      .attr('dy', '-0.35em').attr('text-anchor', 'middle')
+      .text((d) => {
+        const c = d.target.data.count;
+        const p = opts.showPercent ? pctOf(d.target) : null;
+        return p === null ? String(c) : `${c} (${p}%)`;
+      });
 
     return true;
   }
